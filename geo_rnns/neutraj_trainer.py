@@ -25,8 +25,8 @@ def pad_sequence(traj_grids, maxlen=100, pad_value=0.0):
 
 
 class NeuTrajTrainer(object):
-    def __init__(self, tagset_size, data_type, distance_type, embed_dim,
-                 batch_size, sampling_num, learning_rate=config.learning_rate, datalength):
+    def __init__(self, tagset_size, data_type, datalength, distance_type, embed_dim,
+                 batch_size, sampling_num, learning_rate=config.learning_rate ):
 
         self.target_size = tagset_size
         self.batch_size = batch_size
@@ -38,7 +38,7 @@ class NeuTrajTrainer(object):
         self.datalength = datalength
         self.em_batch = int(self.datalength / 2)
 
-    def data_prepare(self, griddatapath, coordatapath, distancepath, train_radio=config.seeds_radio, gird_size):
+    def data_prepare(self, griddatapath, coordatapath, distancepath,  gird_size, train_radio=config.seeds_radio):
         dataset_length = self.datalength
         traj_grids, useful_grids, max_len = cPickle.load(open(griddatapath, 'rb'))
         self.trajs_length = [len(j) for j in traj_grids][:dataset_length]

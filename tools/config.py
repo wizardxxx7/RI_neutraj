@@ -48,5 +48,5 @@ spatial_width = 2
 #
 
 if __name__ == '__main__':
-# print('../model/model_training_600_{}_acc_{}'.format((0), 1))
+    print('../model/model_training_600_{}_acc_{}'.format((0), 1))
 # print(config_to_str())
