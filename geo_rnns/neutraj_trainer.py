@@ -25,17 +25,21 @@ def pad_sequence(traj_grids, maxlen=100, pad_value=0.0):
 
 
 class NeuTrajTrainer(object):
-    def __init__(self, tagset_size,
+    def __init__(self, tagset_size, data_type, distance_type, embed_dim,
                  batch_size, sampling_num, learning_rate=config.learning_rate):
 
         self.target_size = tagset_size
         self.batch_size = batch_size
         self.sampling_num = sampling_num
         self.learning_rate = learning_rate
+        self.data_type = data_type
+        self.distance_type = distance_type
+        self.embed_dim = embed_dim
 
-    def data_prepare(self, griddatapath=config.gridxypath,
-                     coordatapath=config.corrdatapath,
-                     distancepath=config.distancepath,
+
+    def data_prepare(self, griddatapath,
+                     coordatapath,
+                     distancepath,
                      train_radio=config.seeds_radio):
         dataset_length = config.datalength
         traj_grids, useful_grids, max_len = cPickle.load(open(griddatapath, 'rb'))
@@ -79,8 +83,8 @@ class NeuTrajTrainer(object):
         distance = cPickle.load(open(distancepath, 'rb'))
         max_dis = distance.max()
         print('max value in distance matrix :{}'.format(max_dis))
-        print(config.distance_type)
-        if config.distance_type == 'dtw':
+
+        if self.distance_type == 'dtw':
             distance = distance / max_dis
         print("Distance shape")
         print(distance[:train_size].shape)
@@ -91,7 +95,7 @@ class NeuTrajTrainer(object):
         self.distance = distance
         self.train_distance = train_distance
 
-    def batch_generator(self, train_seqs, train_distance):
+    def batch_generator(self, train_seqs, train_distance, mail_pre_degree):
         j = 0
         while j < len(train_seqs):
             anchor_input, trajs_input, negative_input, distance, negative_distance = [], [], [], [], []
@@ -100,8 +104,8 @@ class NeuTrajTrainer(object):
             batch_trajs_input, batch_trajs_len = [], []
             for i in range(self.batch_size):
                 # sampling_index_list = sm.random_sampling(len(self.train_seqs),j+i)
-                sampling_index_list = sm.distance_sampling(self.distance, len(self.train_seqs), j + i)
-                negative_sampling_index_list = sm.negative_distance_sampling(self.distance, len(self.train_seqs), j + i)
+                sampling_index_list = sm.distance_sampling(mail_pre_degree ,self.distance, len(self.train_seqs), j + i)
+                negative_sampling_index_list = sm.negative_distance_sampling(mail_pre_degree, self.distance, len(self.train_seqs), j + i)
 
                 trajs_input.append(train_seqs[j + i])
                 anchor_input.append(train_seqs[j + i])
@@ -130,12 +134,12 @@ class NeuTrajTrainer(object):
                         batch_trajs_input.append(train_seqs[traj_index])
                         batch_trajs_len.append(self.trajs_length[traj_index])
 
-                    distance.append(np.exp(-float(train_distance[j + i][traj_index]) * config.mail_pre_degree))
+                    distance.append(np.exp(-float(train_distance[j + i][traj_index]) * mail_pre_degree))
 
                 for traj_index in negative_sampling_index_list:
                     negative_input.append(train_seqs[traj_index])
                     negative_input_len.append(self.trajs_length[traj_index])
-                    negative_distance.append(np.exp(-float(train_distance[j + i][traj_index]) * config.mail_pre_degree))
+                    negative_distance.append(np.exp(-float(train_distance[j + i][traj_index]) * mail_pre_degree))
 
                     if traj_index not in batch_trajs_keys:
                         batch_trajs_keys[j + i] = 0
@@ -159,7 +163,7 @@ class NeuTrajTrainer(object):
                 [np.array(distance), np.array(negative_distance)])
             j = j + self.batch_size
 
-    def trained_model_eval(self, print_test=100, load_model=None,
+    def trained_model_eval(self, mail_pre_degree, test_num=1500, print_test=100, load_model=None,
                            in_cell_update=True, stard_LSTM=False):
 
         spatial_net = NeuTraj_Network(4, self.target_size, self.grid_size,
@@ -167,20 +171,20 @@ class NeuTrajTrainer(object):
                                       stard_LSTM=stard_LSTM, incell=in_cell_update)
 
         if load_model != None:
-            m = torch.load(open(load_model,'rb'))
+            m = torch.load(open(load_model, 'rb'))
             spatial_net.load_state_dict(m)
 
-            embeddings = tm.test_comput_embeddings(self, spatial_net, test_batch=config.em_batch)
+            embeddings, embedding_time = tm.test_comput_embeddings(self, spatial_net, test_batch=config.em_batch)
             print('len(embeddings): {}'.format(len(embeddings)))
             print(embeddings.shape)
             print(embeddings[0].shape)
 
-            acc1 = tm.test_model(self, embeddings,
-                                 test_range=range(len(self.train_seqs), len(self.train_seqs) + config.test_num),
+            acc1 = tm.test_model(self, mail_pre_degree, embeddings,
+                                 test_range=range(len(self.train_seqs), len(self.train_seqs) + test_num),
                                  similarity=True, print_batch=print_test, r10in50=True)
-            return acc1
+            return acc1, embedding_time
 
-    def neutraj_train(self, print_batch=10, print_test=100, save_model=True, load_model=None,
+    def neutraj_train(self, mail_pre_degree, print_batch=10, test_num=100, print_test=100, save_model=True, load_model=None,
                       in_cell_update=True, stard_LSTM=False):
 
         spatial_net = NeuTraj_Network(4, self.target_size, self.grid_size, self.batch_size, self.sampling_num,
@@ -193,24 +197,26 @@ class NeuTrajTrainer(object):
 
         spatial_net.cuda()
         mse_loss_m.cuda()
-
-        if load_model != None:
-            m = torch.load(open(load_model))
-            spatial_net.load_state_dict(m)
-            embeddings = tm.test_comput_embeddings(self, spatial_net, test_batch=config.em_batch)
-            print('len(embeddings): {}'.format(len(embeddings)))
-            print(embeddings.shape)
-            print(embeddings[0].shape)
-
-            tm.test_model(self, embeddings,
-                          test_range=range(len(self.train_seqs), len(self.train_seqs) + config.test_num),
-                          similarity=True, print_batch=print_test, r10in50=True)
+        model_list = []
+        train_time = []
+        # if load_model != None:
+        #     m = torch.load(open(load_model))
+        #     spatial_net.load_state_dict(m)
+        #     embeddings, _ = tm.test_comput_embeddings(self, spatial_net, test_batch=config.em_batch)
+        #     print('len(embeddings): {}'.format(len(embeddings)))
+        #     print(embeddings.shape)
+        #     print(embeddings[0].shape)
+        #
+        #     tm.test_model(self, embeddings,
+        #                   test_range=range(len(self.train_seqs), len(self.train_seqs) + config.test_num),
+        #                   similarity=True, print_batch=print_test, r10in50=True)
         for epoch in range(config.epochs):
+            start = time.time()
             spatial_net.train()
             print("Start training Epochs : {}".format(epoch))
             # print (len(torch.nonzero(spatial_net.rnn.cell.spatial_embedding)))
-            start = time.time()
-            for i, batch in enumerate(self.batch_generator(self.train_seqs, self.train_distance)):
+
+            for i, batch in enumerate(self.batch_generator(self.train_seqs, self.train_distance, mail_pre_degree)):
 
                 inputs_arrays, inputs_len_arrays, target_arrays = batch[0], batch[1], batch[2]
 
@@ -237,35 +243,36 @@ class NeuTrajTrainer(object):
                                  loss.item(), batch_end - optim_time, batch_end - start))
 
             end = time.time()
+            train_time.append(end - start)
             print('Epoch [{}/{}], Step [{}/{}], Positive_Loss: {}, Negative_Loss: {}, Total_Loss: {}, ' \
                   'Time_cost: {}'. \
                   format(epoch + 1, config.epochs, i + 1, len(self.train_seqs) // self.batch_size,
                          mse_loss_m.trajs_mse_loss.item(), mse_loss_m.negative_mse_loss.item(),
                          loss.item(), end - start))
 
-            embeddings = tm.test_comput_embeddings(self, spatial_net, test_batch=config.em_batch)
+            embeddings, _ = tm.test_comput_embeddings(self, spatial_net, test_batch=config.em_batch)
             print('len(embeddings): {}'.format(len(embeddings)))
             print(len(embeddings))
             print(embeddings[0].shape)
             print(len(self.padded_trajs) * 0.8)
-            acc1 = tm.test_model(self, embeddings, test_range=range(int(len(self.padded_trajs) * 0.8),
-                                                                    int(len(self.padded_trajs) * 0.8) + 100),
+            acc1 = tm.test_model(self, mail_pre_degree, embeddings, test_range=range(int(len(self.padded_trajs) * 0.8),
+                                                                    int(len(self.padded_trajs) * 0.8) + test_num),
                                  similarity=True, print_batch=print_test)
 
             print(acc1)
             if save_model:
                 save_model_name = './model/{}_{}_{}_training_{}_{}_incell{}' \
-                                      .format(config.data_type, config.distance_type, config.recurrent_unit,
+                                      .format(self.data_type, self.distance_type, config.recurrent_unit,
                                               len(embeddings), str(epoch), in_cell_update) + \
                                   '_config_{}_{}_{}_{}_{}_{}_{}_{}'.format(config.stard_unit, config.learning_rate,
-                                                                           config.batch_size, config.sampling_num,
-                                                                           config.seeds_radio, config.data_type,
-                                                                           str(stard_LSTM), config.d) + \
+                                                                           self.batch_size, config.sampling_num,
+                                                                           config.seeds_radio, self.data_type,
+                                                                           str(stard_LSTM), self.embed_dim) + \
                                   '_train_{}_test_{}_{}_{}_{}_{}.h5'.format(acc1[0], acc1[1], acc1[2], acc1[3],
                                                                             acc1[4], acc1[5])
 
             print(save_model_name)
             # print(os.getcwd())
             torch.save(spatial_net.state_dict(), save_model_name)
-        return save_model_name
-
+            model_list.append(save_model_name)
+        return model_list, train_time
