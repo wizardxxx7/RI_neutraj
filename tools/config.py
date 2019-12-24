@@ -15,9 +15,9 @@ sampling_num = 10
 # data_type = distancepath.split('/')[2].split('_')[0]
 
 # Test Config
-datalength = 1874
-em_batch = int(datalength / 2)
-test_num = 1500
+# datalength = 1874
+# em_batch = int(datalength / 2)
+# test_num = 1500
 
 # Model Parameters
 # d = 128
@@ -26,7 +26,7 @@ incell = True
 recurrent_unit = 'GRU'  # GRU, LSTM or SimpleRNN
 spatial_width = 2
 
-gird_size = [1100, 1100]
+# gird_size = [1100, 1100]
 
 
 # def config_to_str():
@@ -48,5 +48,5 @@ gird_size = [1100, 1100]
 #
 
 if __name__ == '__main__':
-    print('../model/model_training_600_{}_acc_{}'.format((0), 1))
-    print(config_to_str())
+# print('../model/model_training_600_{}_acc_{}'.format((0), 1))
+# print(config_to_str())
