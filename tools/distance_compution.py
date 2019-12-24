@@ -40,9 +40,11 @@ def trajecotry_distance_list(trajs, distance_type="hausdorff", batch_size=50, pr
             pool.apply_async(trajectory_distance_batch, (i, trajs[batch_size * batch_number:i], trajs, distance_type,
                                                          data_name))
             batch_number += 1
-    pool.apply_async(trajectory_distance_batch, (i + 1, trajs[batch_size * batch_number:i + 1], trajs, distance_type,
-                                                 data_name))
-    batch_number += 1
+    if i % batch_size != 0:
+        pool.apply_async(trajectory_distance_batch,
+                         (i + 1, trajs[batch_size * batch_number:i + 1], trajs, distance_type,
+                          data_name))
+        batch_number += 1
     pool.close()
     pool.join()
 
