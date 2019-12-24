@@ -32,10 +32,10 @@ def test_comput_embeddings(self, spatial_net, test_batch=1025):
             print(embeddings_list.size())
     # print (embeddings_list)
     # return [x.cpu().numpy() for x in embeddings_list]
-    return embeddings_list.cpu().numpy()
+    return embeddings_list.cpu().numpy(), time.time() - s
 
 
-def test_model(self, traj_embeddings, test_range, print_batch=30, similarity=False, r10in50=False):
+def test_model(self, mail_pre_degree, traj_embeddings, test_range, print_batch=30, similarity=False, r10in50=False):
     top_10_count, l_top_10_count = 0, 0
     top_50_count, l_top_50_count = 0, 0
     top10_in_top50_count = 0
@@ -45,13 +45,14 @@ def test_model(self, traj_embeddings, test_range, print_batch=30, similarity=Fal
     error_true, error_test, errorr1050 = 0., 0., 0.
 
     # print ('----------------' ,len(traj_embeddings[0]), len(traj_embeddings[1]),  test_range )
+    avg_search_time = 0
     for i in test_range:
-
+        s = time.time()
         if similarity:
             # This is for the exp similarity
             test_distance = [(j, float(np.exp(-np.sum(np.square(traj_embeddings[i] - e))))) for j, e in
                              enumerate(traj_embeddings)]
-            t_similarity = np.exp(-self.distance[i][:len(traj_embeddings)] * config.mail_pre_degree)
+            t_similarity = np.exp(-self.distance[i][:len(traj_embeddings)] * mail_pre_degree)
             true_distance = list(enumerate(t_similarity))
             learned_distance = list(enumerate(self.distance[i][:len(self.train_seqs)]))
 
@@ -105,6 +106,7 @@ def test_model(self, traj_embeddings, test_range, print_batch=30, similarity=Fal
         errorr1050 += test_top_10_distance_r10in50
 
         test_traj_num += 1
+        avg_search_time += time.time() - s
         # if (i % print_batch) == 0:
         #     # print (test_distance
         #
@@ -124,12 +126,14 @@ def test_model(self, traj_embeddings, test_range, print_batch=30, similarity=Fal
     print('Error true:{}'.format((float(error_true) / (test_traj_num * 10)) * 84000))
     print('Error test:{}'.format((float(error_test) / (test_traj_num * 10)) * 84000))
     print('Error div :{}'.format((float(abs(error_test - error_true)) / (test_traj_num * 10)) * 84000))
+    print('Average seach time: {} for {} trajs'.format(float(avg_search_time / len(test_range)), len(test_range)))
     return (float(top_10_count) / (test_traj_num * 10), \
             float(top_50_count) / (test_traj_num * 50), \
             float(top10_in_top50_count) / (test_traj_num * 10), \
             (float(error_true) / (test_traj_num * 10)) * 84000, \
             (float(error_test) / (test_traj_num * 10)) * 84000, \
-            (float(abs(error_test - error_true)) / (test_traj_num * 10)) * 84000)
+            (float(abs(error_test - error_true)) / (test_traj_num * 10)) * 84000, \
+            float(avg_search_time / len(test_range)))
 
 
 if __name__ == '__main__':

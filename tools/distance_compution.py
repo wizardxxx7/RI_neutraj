@@ -4,9 +4,6 @@ import multiprocessing
 import sys
 import traj_dist.distance as  tdist
 
-sys.path.append('/home/yiwei/anaconda3/lib/python3.7/site-packages/trajectory_distance-1.0-py3.7-linux-x86_64.egg/')
-sys.path.append('/home/yiwei/anaconda3/lib/python3.7/site-packages/Geohash-1.0-py3.7.egg/Geohash')
-
 
 def trajectory_distance(traj_feature_map, traj_keys, distance_type="hausdorff", batch_size=50, processors=30):
     # traj_keys= traj_feature_map.keys()
@@ -57,7 +54,8 @@ def trajectory_distance_batch(i, batch_trjs, trjs, metric_type="hausdorff", data
     else:
         trs_matrix = tdist.cdist(batch_trjs, trjs, metric=metric_type)
     # print('Counting distance ing!!!')
-    cPickle.dump(trs_matrix, open('./features/' + data_name + '_' + metric_type + '_distance_' + str(i), 'wb'))
+    cPickle.dump(trs_matrix,
+                 open('./features/' + data_name + '/' + data_name + '_' + metric_type + '_distance_' + str(i), 'wb'))
     print('complete: ' + str(i))
 
 
@@ -66,7 +64,8 @@ def trajectory_distance_combain(trajs_len, batch_size=100, metric_type="hausdorf
     a = 0
     for i in range(1, trajs_len + 1):
         if (i != 0) & (i % batch_size == 0):
-            load_dis = cPickle.load(open('./features/' + data_name + '_' + metric_type + '_distance_' + str(i), 'rb'))
+            load_dis = cPickle.load(
+                open('./features/' + data_name + '/' + data_name + '_' + metric_type + '_distance_' + str(i), 'rb'))
             distance_list.append(load_dis)
             print(distance_list[-1].shape)
 
@@ -77,5 +76,6 @@ def trajectory_distance_combain(trajs_len, batch_size=100, metric_type="hausdorf
     print(distances.shape)
     all_dis = distances.reshape((trajs_len - trajs_len % 10, a))
     print(all_dis.shape)
-    cPickle.dump(all_dis, open('./features/' + data_name + '_' + metric_type + '_distance_all_' + str(trajs_len), 'wb'))
+    cPickle.dump(all_dis, open(
+        './features/' + data_name + '/' + data_name + '_' + metric_type + '_distance_all_' + str(trajs_len), 'wb'))
     return all_dis

@@ -3,9 +3,6 @@ import numpy as np
 import _pickle as cPickle
 from utils import check_dirs
 
-beijing_lat_range = [39.6, 40.7]
-beijing_lon_range = [115.9, 117, 1]
-
 
 class Preprocesser(object):
     def __init__(self, delta=0.005, lat_range=[1, 2], lon_range=[1, 2]):
@@ -109,11 +106,9 @@ class Preprocesser(object):
             return traj_grids, useful_grids, max_len
 
 
-def trajectory_feature_generation(path='./data/toy_trajs',
-                                  lat_range=beijing_lat_range,
-                                  lon_range=beijing_lon_range,
+def trajectory_feature_generation(lat_range, lon_range, path='./data/toy_trajs',
                                   min_length=50):
-    fname = path.split('/')[-1].split('_')[0]
+    fname = path.split('/')[-1]
     path_open = open(path).read()
     path_open = bytes(path_open, 'ascii')
     trajs = cPickle.loads(path_open, encoding='bytes')
@@ -151,13 +146,15 @@ def trajectory_feature_generation(path='./data/toy_trajs',
     print(max_len)
     print(len(traj_index.keys()))
     # print(in_range_cnt, len(trajs))
-    traj_open = './features/{}_traj_index'.format(fname)
+    check_dirs(['./features/{}'.format(fname)])
+    traj_open = './features/{}/{}_traj_index'.format(fname, fname)
+
     cPickle.dump(traj_index, open(traj_open, 'wb'))
 
     trajs, useful_grids, max_len = preprocessor.preprocess(traj_index, isCoordinate=True)
 
     print(trajs[0])
-    cPickle.dump((trajs, [], max_len), open('./features/{}_traj_coord'.format(fname), 'wb'))
+    cPickle.dump((trajs, [], max_len), open('./features/{}/{}_traj_coord'.format(fname, fname), 'wb'))
     # traj_grids = cPickle.load(open('./data_taxi/porto_traj_coord'))
     all_trajs_grids_xy = []
     min_x, min_y, max_x, max_y = 2000, 2000, 0, 0
@@ -186,6 +183,7 @@ def trajectory_feature_generation(path='./data/toy_trajs',
     print(all_trajs_grids_xy[0])
     print(len(all_trajs_grids_xy))
     print(all_trajs_grids_xy[0])
-    cPickle.dump((all_trajs_grids_xy, [], max_len), open('./features/{}_traj_grid'.format(fname), 'wb'))
 
-    return './features/{}_traj_coord'.format(fname), fname, len(all_trajs_grids_xy)
+    cPickle.dump((all_trajs_grids_xy, [], max_len), open('./features/{}/{}_traj_grid'.format(fname, fname), 'wb'))
+
+    return len(all_trajs_grids_xy)

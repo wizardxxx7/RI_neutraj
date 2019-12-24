@@ -11,9 +11,9 @@ def random_sampling(train_seq_len, index):
     return sampling_index_list
 
 
-def distance_sampling(distance, train_seq_len, index):
+def distance_sampling(mail_pre_degree, distance, train_seq_len, index):
     index_dis = distance[index]
-    pre_sort = [np.exp(-i * config.mail_pre_degree) for i in index_dis[:train_seq_len]]
+    pre_sort = [np.exp(-i * mail_pre_degree) for i in index_dis[:train_seq_len]]
     sample_index = []
     t = 0
     importance = []
@@ -36,9 +36,9 @@ def distance_sampling(distance, train_seq_len, index):
     return [i[0] for i in sorted_sample_index]
 
 
-def negative_distance_sampling(distance, train_seq_len, index):
+def negative_distance_sampling(mail_pre_degree, distance, train_seq_len, index):
     index_dis = distance[index]
-    pre_sort = [np.exp(-i * config.mail_pre_degree) for i in index_dis[:train_seq_len]]
+    pre_sort = [np.exp(-i * mail_pre_degree) for i in index_dis[:train_seq_len]]
     pre_sort = np.ones_like(np.array(pre_sort)) - pre_sort
     # print [(i,j) for i,j in enumerate(pre_sort)]
     sample_index = []
