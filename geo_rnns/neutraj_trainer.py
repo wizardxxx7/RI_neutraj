@@ -25,7 +25,7 @@ def pad_sequence(traj_grids, maxlen=100, pad_value=0.0):
 
 
 class NeuTrajTrainer(object):
-    def __init__(self, tagset_size, data_type, datalength, distance_type, embed_dim,
+    def __init__(self, tagset_size, grid_size, data_type, datalength, distance_type, embed_dim,
                  batch_size, sampling_num, learning_rate=config.learning_rate ):
 
         self.target_size = tagset_size
@@ -36,13 +36,13 @@ class NeuTrajTrainer(object):
         self.distance_type = distance_type
         self.embed_dim = embed_dim
         self.datalength = datalength
-        self.em_batch = int(self.datalength / 2)
+        self.em_batch = int (self.datalength/ 2)
+        self.grid_size = grid_size
 
-    def data_prepare(self, griddatapath, coordatapath, distancepath,  gird_size, train_radio=config.seeds_radio):
+    def data_prepare(self, griddatapath, coordatapath, distancepath, train_radio=config.seeds_radio):
         dataset_length = self.datalength
         traj_grids, useful_grids, max_len = cPickle.load(open(griddatapath, 'rb'))
         self.trajs_length = [len(j) for j in traj_grids][:dataset_length]
-        self.grid_size = gird_size
         self.max_length = max_len
         grid_trajs = [[[i[0] + config.spatial_width, i[1] + config.spatial_width] for i in tg]
                       for tg in traj_grids[:dataset_length]]
@@ -165,9 +165,8 @@ class NeuTrajTrainer(object):
     def trained_model_eval(self, mail_pre_degree, test_num=1500, print_test=100, load_model=None,
                            in_cell_update=True, stard_LSTM=False):
 
-        spatial_net = NeuTraj_Network(4, self.target_size, self.grid_size,
-                                      self.batch_size, self.sampling_num,
-                                      stard_LSTM=stard_LSTM, incell=in_cell_update)
+        spatial_net = NeuTraj_Network(4, self.target_size, self.batch_size, self.sampling_num,
+                                      stard_LSTM=stard_LSTM, incell=in_cell_update, grid_size=self.grid_size)
 
         if load_model != None:
             m = torch.load(open(load_model, 'rb'))
@@ -187,8 +186,8 @@ class NeuTrajTrainer(object):
                       load_model=None,
                       in_cell_update=True, stard_LSTM=False):
 
-        spatial_net = NeuTraj_Network(4, self.target_size, self.grid_size, self.batch_size, self.sampling_num,
-                                      stard_LSTM=stard_LSTM, incell=in_cell_update)
+        spatial_net = NeuTraj_Network(4, self.target_size, self.batch_size, self.sampling_num,
+                                      stard_LSTM=stard_LSTM, incell=in_cell_update, grid_size=self.grid_size)
 
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, spatial_net.parameters()),
                                      lr=config.learning_rate)

@@ -359,6 +359,7 @@ class SAM_GRUCell(RNNCellBase):
         )
 
     def spatial_gru_cell(self, input_a, hidden, w_ih, w_hh, b_ih=None, b_hh=None):
+        # print(type(input_a))
         input = input_a[:,:-2]
         grid_input = input_a[:,-2:].type(torch.LongTensor).cuda() + config.spatial_width
 

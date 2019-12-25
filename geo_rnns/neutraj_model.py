@@ -51,6 +51,7 @@ class RNNEncoder(Module):
             else:
                 out, state = self.cell(cell_input, (out, state))
             outputs.append(out)
+
         mask_out = []
         for b, v in enumerate(inputs_len):
             mask_out.append(outputs[v-1][b,:].view(1,-1))
@@ -74,14 +75,15 @@ class RNNEncoder(Module):
                                     batch_bias_ih, batch_bias_hh)
 
 
+
 class NeuTraj_Network(Module):
-    def __init__(self,input_size, target_size, grid_size, batch_size, sampling_num, stard_LSTM = False, incell = True):
+    def __init__(self,input_size, target_size, batch_size, sampling_num, grid_size, stard_LSTM = False, incell = True):
         super(NeuTraj_Network, self).__init__()
         self.input_size = input_size
         self.target_size = target_size
-        self.grid_size = grid_size
         self.batch_size = batch_size
         self.sampling_num = sampling_num
+        self.grid_size = grid_size
         if config.recurrent_unit=='GRU' or config.recurrent_unit=='SimpleRNN':
             self.hidden = autograd.Variable(torch.zeros(self.batch_size * (1 + self.sampling_num), self.target_size),
                                              requires_grad=False).cuda()

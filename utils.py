@@ -311,7 +311,7 @@ class RawSignal:
         min_lat = df.lat.min() * 1.5 - df.lat.max() * 0.5
         N = len(df)
         content = '''var lon = %.5f\nvar lat = %.5f\nvar max_lon = %.5f\nvar min_lon = %.5f''' % (
-        lon, lat, max_lon, min_lon) \
+            lon, lat, max_lon, min_lon) \
                   + '''\nvar max_lat = %.5f\nvar min_lat = %.5f\nvar \n''' % (max_lat, min_lat) \
                   + '''%s = {'points': [''' % var_name
         for i in range(N):
@@ -353,7 +353,7 @@ class RawSignal:
         res = obs
         for i in range(1, len(obs)):
             if obs['lon'][i - 1] != obs['lon'][i] or obs['lat'][
-                    i - 1] != obs['lat'][i]:
+                i - 1] != obs['lat'][i]:
                 inds.append([i])
             else:
                 inds[len(inds) - 1].append(i)
@@ -371,7 +371,7 @@ class RawSignal:
 
     @staticmethod
     def norm_pos(pos, alpha=1):
-        norm = np.sqrt(pos[0]**2 + pos[1]**2)
+        norm = np.sqrt(pos[0] ** 2 + pos[1] ** 2)
         return pos[0] * alpha / norm, pos[1] * alpha / norm
 
 
@@ -545,13 +545,13 @@ class AllUsersSignal:
         '''
         kwargs = {
             'title': ('' if file_date is None else '[%s]' % file_date) +
-            'User Daily Signal Count',
+                     'User Daily Signal Count',
             'xlab': 'Count',
             'ylab': 'Number of People'
         }
         out_dir = os.path.join(
             self.analysis_dir, '[pic]user_daily_signal_count%s' %
-            '(unique)' if unique_cell else '')
+                               '(unique)' if unique_cell else '')
         check_dir(out_dir)
         AllUsersSignal.plot_count_hist_based(counts, 0, 1000, out_dir,
                                              **kwargs)
@@ -929,7 +929,6 @@ class Plot:
         for i in range(len(x)):
             plt.scatter(x[i], y[i], c=c[i], s=s)
         if title is not None:
-
             plt.title(title, fontsize=text_size)
         plt.xlabel(xlab, font1)
         plt.ylabel(ylab, font1)
@@ -974,7 +973,6 @@ class Plot:
         plt.scatter(x, y, c=c, s=s)
 
         if title is not None:
-
             plt.title(title, fontsize=text_size)
         plt.xlabel(xlab, font1)
         plt.ylabel(ylab, font1)
@@ -1102,6 +1100,7 @@ class NewDict(dict):
     Example:
     m = Map({'first_name': 'Eduardo'}, last_name='Pool', age=24, sports=['Soccer'])
     """
+
     def __init__(self, *args, **kwargs):
         super(NewDict, self).__init__(*args, **kwargs)
         for arg in args:
@@ -1156,7 +1155,7 @@ class MapPlot:
         min_lat = df.lat.min() * 1.5 - df.lat.max() * 0.5
         N = len(df)
         content = '''var lon = %.5f\nvar lat = %.5f\nvar max_lon = %.5f\nvar min_lon = %.5f''' % (
-        lon, lat, max_lon, min_lon) \
+            lon, lat, max_lon, min_lon) \
                   + '''\nvar max_lat = %.5f\nvar min_lat = %.5f\nvar user_id = '%s'\n''' % (max_lat, min_lat, user_id) \
                   + '''%s = {'points': [''' % var_name
         for i in range(N):
@@ -1238,7 +1237,7 @@ class MapPlot:
         else:
             test = folium.Html('info:{}</br> lon:{}</br> lat:{}</br> '.format(
                 info, lon, lat),
-                               script=True)
+                script=True)
         popup = folium.Popup(test, max_width=1000)
         folium.Marker([lat, lon], popup=popup,
                       icon=folium.Icon(color=color)).add_to(mp)
@@ -1258,34 +1257,21 @@ class MapPlot:
                                  dates=signal.dates.tolist())
 
     @staticmethod
-    def plot_traj(lons,
-                  lats,
-                  zoom=10,
-                  colors=None,
-                  save_path='a.html',
-                  transforms=None,
-                  rnd=8,
-                  dates=None,
-                  marker=False,
-                  weight=5):
+    def plot_traj(lons, lats, zoom=10, colors=None, save_path='a.html', transforms=None, rnd=8, dates=None,
+                  marker=False):
         '''Input is baidu, folium is transform of gcj'''
         from folium import plugins
 
         if len(lons) > 0 and type(lons[0]) == list:
             n_traj = len(lons)
-            lon_m = round(
-                np.sum(np.sum(lons)) / np.sum([len(x) for x in lons]), rnd)
-            lat_m = round(
-                np.sum(np.sum(lats)) / np.sum([len(x) for x in lats]), rnd)
+            lon_m = round(np.sum(np.sum(lons)) / np.sum([len(x) for x in lons]), rnd)
+            lat_m = round(np.sum(np.sum(lats)) / np.sum([len(x) for x in lats]), rnd)
             my_map = folium.Map(location=[lat_m, lon_m], zoom_start=zoom)
-            transforms = [
-                True
-            ] * n_traj if transforms is None else transforms if type(
-                transforms) == list else [transforms] * len(lons)
-            colors = ['black'] * n_traj if colors is None else colors if type(
-                colors) == list else [colors] * n_traj
-            colors = (colors * (n_traj // len(colors) + 1)
-                      )[:n_traj] if len(colors) != n_traj else colors
+            transforms = [True] * n_traj if transforms is None else transforms if type(transforms) == list else [
+                                                                                                                    transforms] * len(
+                lons)
+            colors = ['black'] * n_traj if colors is None else colors if type(colors) == list else [colors] * n_traj
+            colors = (colors * (n_traj // len(colors) + 1))[:n_traj] if len(colors) != n_traj else colors
             # if marker: colors = [MARK_COLOR[i % len(MARK_COLOR)] for i in range(n_traj)]
             for traj in range(len(lons)):
                 if transforms[traj]:
@@ -1294,11 +1280,8 @@ class MapPlot:
                     lon, lat = lons[traj], lats[traj]
                 lon = MapPlot.round_lst(lon, rnd)
                 lat = MapPlot.round_lst(lat, rnd)
-                folium.PolyLine([(lat[i], lon[i])
-                                 for i in range(len(lons[traj]))],
-                                weight=weight,
-                                color='black' if colors is None else
-                                colors[traj]).add_to(my_map)
+                folium.PolyLine([(lat[i], lon[i]) for i in range(len(lons[traj]))],
+                                color='black' if colors is None else colors[traj]).add_to(my_map)
                 # my_map = MapPlot.pop_mark(lon[0], lat[0], my_map)
             if marker:
                 poses = {}
@@ -1309,32 +1292,19 @@ class MapPlot:
                         lon, lat = lons[traj], lats[traj]
                     for i in range(len(lons[traj])):
                         pos = (lon[i], lat[i])
-                        tmp = [traj, i] if dates is None else [
-                            traj, i, dates[traj][i]
-                        ]
+                        tmp = [traj, i] if dates is None else [traj, i, dates[traj][i]]
                         if pos in poses:
                             poses[pos].append(tmp)
                         else:
                             poses[pos] = [tmp]
                 for pk, pv in poses.items():
                     if dates is not None:
-                        pvs = [
-                            'T%d; i%d; %s' % (v[0], v[1], str(v[2]))
-                            for v in pv
-                        ]
-                        my_map = MapPlot.pop_mark(pk[0],
-                                                  pk[1],
-                                                  my_map,
-                                                  'Point: </br>%s' %
-                                                  '</br>'.join(pvs),
+                        pvs = ['T%d; i%d; %s' % (v[0], v[1], str(v[2])) for v in pv]
+                        my_map = MapPlot.pop_mark(pk[0], pk[1], my_map, 'Point: </br>%s' % '</br>'.join(pvs),
                                                   color=pv[0][0])
                     else:
-                        pvs = ['T%d; i%d' % v for v in pv]
-                        my_map = MapPlot.pop_mark(pk[0],
-                                                  pk[1],
-                                                  my_map,
-                                                  "Point: </br>%s" %
-                                                  '</br>'.join(pvs),
+                        pvs = ['T%d; i%d' % (v[0], v[1]) for v in pv]
+                        my_map = MapPlot.pop_mark(pk[0], pk[1], my_map, "Point: </br>%s" % '</br>'.join(pvs),
                                                   color=pv[0][0])
             my_map.fit_bounds(my_map.get_bounds())
             my_map.save(save_path)
@@ -1348,9 +1318,8 @@ class MapPlot:
                 lons, lats = MapPlot._bd2folium(lons, lats)
             lons = MapPlot.round_lst(lons, rnd)
             lats = MapPlot.round_lst(lats, rnd)
-            folium.PolyLine(
-                [(lats[i], lons[i]) for i in range(len(lons))],
-                color='black' if colors is None else colors).add_to(my_map)
+            folium.PolyLine([(lats[i], lons[i]) for i in range(len(lons))],
+                            color='black' if colors is None else colors).add_to(my_map)
             if marker:
                 poses = {}
                 for i in range(len(lons)):
@@ -1363,19 +1332,11 @@ class MapPlot:
                 for pk, pv in poses.items():
                     if dates is not None:
                         pvs = ['i%d; %s' % (v[0], str(v[1])) for v in pv]
-                        my_map = MapPlot.pop_mark(pk[0],
-                                                  pk[1],
-                                                  my_map,
-                                                  'Point: </br>%s' %
-                                                  '</br>'.join(pvs),
+                        my_map = MapPlot.pop_mark(pk[0], pk[1], my_map, 'Point: </br>%s' % '</br>'.join(pvs),
                                                   color=pv[0][0])
                     else:
                         pvs = ['i%d' % v[0] for v in pv]
-                        my_map = MapPlot.pop_mark(pk[0],
-                                                  pk[1],
-                                                  my_map,
-                                                  "Point: </br>%s" %
-                                                  '</br>'.join(pvs),
+                        my_map = MapPlot.pop_mark(pk[0], pk[1], my_map, "Point: </br>%s" % '</br>'.join(pvs),
                                                   color=pv[0][0])
             my_map.fit_bounds(my_map.get_bounds())
             my_map.save(save_path)
@@ -1404,7 +1365,7 @@ class MapPlot:
             np.sum(np.sum(lats)) / np.sum([len(x) for x in lats]), rnd)
         my_map = folium.Map(location=[lat_m, lon_m], zoom_start=zoom)
         transforms = [True] * n_traj if transforms is None else transforms if type(transforms) == list \
-            else[transforms] * len(lons)
+            else [transforms] * len(lons)
         colors = ['red'] * n_traj if colors is None else colors if type(
             colors) == list else [colors] * n_traj
         colors = (colors * (n_traj // len(colors) + 1)
@@ -1868,6 +1829,7 @@ class DTW:
     '''
     Dynamic Time Wrapping Algorithm.
     '''
+
     def __init__(self, ts1, ts2, is_norm=False):
         '''
         :param ts1: Time series 1 with m time periods. A list [[lon, lat]].
@@ -2211,8 +2173,9 @@ def output_data_js(df, output_f, var_name='data'):
     max_lat = df.lat.max() * 1.5 - df.lat.min() * 0.5
     min_lat = df.lat.min() * 1.5 - df.lat.max() * 0.5
     N = len(df)
-    content = '''var lon = %.5f\nvar lat = %.5f\nvar max_lon = %.5f\nvar min_lon = %.5f''' % (lon, lat, max_lon, min_lon) \
-              + '''\nvar max_lat = %.5f\nvar min_lat = %.5f\nvar \n''' % (max_lat, min_lat)\
+    content = '''var lon = %.5f\nvar lat = %.5f\nvar max_lon = %.5f\nvar min_lon = %.5f''' % (
+    lon, lat, max_lon, min_lon) \
+              + '''\nvar max_lat = %.5f\nvar min_lat = %.5f\nvar \n''' % (max_lat, min_lat) \
               + '''%s = {'points': [''' % var_name
     for i in range(N):
         if 'dates' in df.columns:
@@ -2248,7 +2211,7 @@ def cal_distance(pos1, pos2):
     lon1, lat1, lon2, lat2 = map(radians, [pos1[0], pos1[1], pos2[0], pos2[1]])
     dlon = lon2 - lon1
     dlat = lat2 - lat1
-    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
     c = 2 * asin(sqrt(a))
     r = 6371  # earth radius, km
     return c * r * 1000
@@ -2278,6 +2241,7 @@ class ShanghaiData:
     读取上海市收集到的信令数据
     有公交车、私家车、地铁和自行车的数据
     '''
+
     @staticmethod
     def get_data(raw_cell_dir, sh_type='bus', clean=True):
         raw_cell_dir = os.path.join(raw_cell_dir, sh_type)
@@ -2431,4 +2395,3 @@ if __name__ == '__main__':
     #                          save_path='/Users/Viki/Documents/yhliu/project/BigEyeOut/tmp/tmp.html')
 
     # Coordinate().eval_bd_wgs(111, 32)
-

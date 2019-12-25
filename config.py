@@ -26,7 +26,6 @@ incell = True
 recurrent_unit = 'GRU'  # GRU, LSTM or SimpleRNN
 spatial_width = 2
 
-gird_size = [1100, 1100]
 
 
 # def config_to_str():

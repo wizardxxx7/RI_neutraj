@@ -34,20 +34,19 @@ if __name__ == '__main__':
 
     beijing_lat_range = [39.6, 40.7]
     beijing_lon_range = [115.9, 117, 1]
-    gird_size = [1100, 1100]
 
     coor_path = './features/{}/{}_traj_coord'.format(data_type, data_type)
     grid_path = './features/{}/{}_traj_grid'.format(data_type, data_type)
 
-    valid_traj_num = preprocess.trajectory_feature_generation(path='./data/' + data_type, lat_range=beijing_lat_range,
-                                                              lon_range=beijing_lon_range)
-    distance_list = ["discret_frechet", "dtw", "erp", "hausdorff", "sspd", "lcss", "frechet", "sowd_grid", "edr"]
-
+    # valid_traj_num = preprocess.trajectory_feature_generation(path='./data/' + data_type, lat_range=beijing_lat_range, lon_range=beijing_lon_range)
+    valid_traj_num = 1874
+    distance_list = ["dtw", "discret_frechet", "erp", "hausdorff", "sspd", "lcss", "frechet", "sowd_grid", "edr"]
+    gird_size = [1100, 1100]
     for i in range(3):
         # Training Part
         distance_type = distance_list[i]
         # distance_type = 'hausdorff'
-        distance_comp(coor_path, valid_traj_num, data_type, distance_type)
+        # distance_comp(coor_path, valid_traj_num, data_type, distance_type)
         distance_path = './features/' + data_type + '/' + data_type + '_' + distance_type + '_distance_all_' + str(
             valid_traj_num)
         if distance_type == 'dtw':
@@ -59,10 +58,10 @@ if __name__ == '__main__':
 
         trajrnn = NeuTrajTrainer(tagset_size=embed_dim, batch_size=batch_size, sampling_num=sampling_num,
                                  data_type=data_type, distance_type=distance_type, embed_dim=embed_dim,
-                                 datalength=valid_traj_num)
+                                 datalength=valid_traj_num, grid_size=gird_size)
 
         trajrnn.data_prepare(griddatapath=grid_path, coordatapath=coor_path,
-                             distancepath=distance_path, train_radio=config.seeds_radio, gird_size=gird_size)
+                             distancepath=distance_path, train_radio=config.seeds_radio)
         load_model_name = None
 
         model_list, train_time = trajrnn.neutraj_train(mail_pre_degree=mail_pre_degree, load_model=None,
