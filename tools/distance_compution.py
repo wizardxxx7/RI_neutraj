@@ -74,7 +74,7 @@ def trajectory_distance_combain(trajs_len, batch_size=100, metric_type="hausdorf
     a = distance_list[-1].shape[1]
     distances = np.array(distance_list)
     print(distances.shape)
-    all_dis = distances.reshape((trajs_len - trajs_len % 10, a))
+    all_dis = distances.reshape((2210, a))
     print(all_dis.shape)
     cPickle.dump(all_dis, open(
         './features/' + data_name + '/' + data_name + '_' + metric_type + '_distance_all_' + str(trajs_len), 'wb'))

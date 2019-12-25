@@ -17,6 +17,7 @@ def test_comput_embeddings(self, spatial_net, test_batch=1025):
     s = time.time()
 
     while j < self.padded_trajs.shape[0]:  # 1800
+        print (j, test_batch)
         for i in range(self.batch_size):
             out = spatial_net.rnn([autograd.Variable(torch.Tensor(self.padded_trajs[j:j + test_batch]),
                                                      requires_grad=False).cuda(),

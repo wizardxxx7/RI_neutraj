@@ -7,7 +7,7 @@
 GPU = "0"
 learning_rate = 0.005
 seeds_radio = 0.2
-epochs = 10
+epochs = 15
 # batch_size = 9
 sampling_num = 10
 #
