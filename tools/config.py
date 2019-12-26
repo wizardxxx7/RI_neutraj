@@ -8,8 +8,13 @@ GPU = "0"
 learning_rate = 0.005
 seeds_radio = 0.2
 epochs = 15
-# batch_size = 9
+stard_unit = False  # It controls the type of recurrent unit (standrad cells or SAM argumented cells)
+incell = True
+recurrent_unit = 'GRU'  # GRU, LSTM or SimpleRNN
+spatial_width = 2
 sampling_num = 10
+# batch_size = 9
+
 #
 # distance_type = distancepath.split('/')[2].split('_')[1]
 # data_type = distancepath.split('/')[2].split('_')[0]
@@ -21,10 +26,7 @@ sampling_num = 10
 
 # Model Parameters
 # d = 128
-stard_unit = False  # It controls the type of recurrent unit (standrad cells or SAM argumented cells)
-incell = True
-recurrent_unit = 'GRU'  # GRU, LSTM or SimpleRNN
-spatial_width = 2
+
 
 # gird_size = [1100, 1100]
 

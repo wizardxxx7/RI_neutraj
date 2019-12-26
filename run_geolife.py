@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 import _pickle as cPickle
 import numpy as  np
-from porto import Porto
+from geolife import geolife
 from tensorboardX import SummaryWriter
 
 
@@ -22,8 +22,8 @@ def distance_comp(coor_path, valid_traj_num, data_name, distance_type='discret_f
     print(len(np_traj_coord))
 
     batch_size = int(valid_traj_num / 10)
-    # trajecotry_distance_list(np_traj_coord, batch_size=batch_size, processors=15, distance_type=distance_type,
-    #                          data_name=data_name)
+    trajecotry_distance_list(np_traj_coord, batch_size=batch_size, processors=15, distance_type=distance_type,
+                             data_name=data_name)
 
     trajectory_distance_combain(valid_traj_num, batch_size=batch_size,
                                 metric_type=distance_type, data_name=data_name)
@@ -31,18 +31,20 @@ def distance_comp(coor_path, valid_traj_num, data_name, distance_type='discret_f
 
 if __name__ == '__main__':
     # Preprocessing Part
-    data_list = ['toy_trajs', 'Porto', 'Geolife']
-    data_type = data_list[1]
+    data_list = ['toy_trajs', 'Porto', 'geolife']
+    data_type = data_list[2]
 
-    file_path = '/home/yiwei/data/Porto'
-    f = Porto(file_path)
-    grid_size = [70, 70]
+    file_path = '/home/yiwei/data/Geolife1.3/Data'
+    f = geolife(file_path)
+    grid_size = [1100, 1100]
 
     coor_path = './features/{}/{}_traj_coord'.format(data_type, data_type)
     grid_path = './features/{}/{}_traj_grid'.format(data_type, data_type)
 
-    valid_traj_num = preprocess.trajectory_feature_generation_porto(f=f, path='./data/' + data_type, lat_range=f.lat_range,lon_range=f.lon_range, min_length=50)
-    valid_traj_num = 2214
+    valid_traj_num = preprocess.trajectory_feature_generation_geolife(f=f, path='./data/' + data_type,
+                                                                      lat_range=f.lat_range, lon_range=f.lon_range,
+                                                                      min_length=50)
+    # valid_traj_num = 2364
     distance_list = ["dtw", "discret_frechet", "hausdorff", "erp", "sspd", "lcss", "frechet", "sowd_grid", "edr"]
 
     for i in range(3):
